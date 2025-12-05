@@ -38,7 +38,7 @@ module asyn_fifo#(
 	dual_port_RAM #(
 		.DEPTH(DEPTH),
 		.WIDTH(WIDTH)
-	) RAM (
+	) RAM_0 (
 		.wclk(wclk),
 		.wenc(wenc),
 		.waddr(waddr),
@@ -52,11 +52,11 @@ module asyn_fifo#(
 	// Write FIFO
 	always @(posedge wclk or negedge wrstn) begin
 		if (~wrstn) begin
-			waddr_ptr <= {(ADDR_WIDTH+1){1'b0}};
+			waddr_ptr <= {(ADDR_WIDTH + 1){1'b0}};
 		end 
 		else begin
 			if (wenc) begin
-				if (waddr_ptr == DEPTH-1) begin
+				if (waddr_ptr == DEPTH - 1) begin
 					waddr_ptr[ADDR_WIDTH - 1 : 0] <= {ADDR_WIDTH{1'b0}};
 					waddr_ptr[ADDR_WIDTH] <= ~waddr_ptr[ADDR_WIDTH];
 				end 
@@ -68,16 +68,16 @@ module asyn_fifo#(
 	end
 
 	bin2gray #(
-		.WIDTH(ADDR_WIDTH+1)
+		.WIDTH(ADDR_WIDTH + 1)
 	) bin2gray_waddr (
 		.bin_code(waddr_ptr),
 		.gray_code(waddr_ptr_gray)
 	);
 
 	sync_data #(
-		.WIDTH(ADDR_WIDTH+1),
+		.WIDTH(ADDR_WIDTH + 1),
 		.SYNC_STAGE(1)
-	) waddr_gray_wclk_sync (
+	) waddr_wclk_sync (
 		.clk(wclk),
 		.rstn(wrstn),
 		.data_in(waddr_ptr_gray),
@@ -87,7 +87,7 @@ module asyn_fifo#(
 	sync_data #(
 		.WIDTH(ADDR_WIDTH+1),
 		.SYNC_STAGE(2)
-	) waddr_gray_rclk_sync (
+	) waddr_rclk_sync (
 		.clk(rclk),
 		.rstn(rrstn),
 		.data_in(waddr_gray_wsync),
@@ -97,7 +97,7 @@ module asyn_fifo#(
 	// Read FIFO
 	always @(posedge rclk or negedge rrstn) begin
 		if (~rrstn) begin
-			raddr_ptr <= {(ADDR_WIDTH+1){1'b0}};
+			raddr_ptr <= {(ADDR_WIDTH + 1){1'b0}};
 		end 
 		else begin
 			if (renc) begin
@@ -113,49 +113,49 @@ module asyn_fifo#(
 	end
 
 	bin2gray #(
-		.WIDTH(ADDR_WIDTH+1)
+		.WIDTH(ADDR_WIDTH + 1)
 	) bin2gray_raddr (
 		.bin_code(raddr_ptr),
 		.gray_code(raddr_ptr_gray)
 	);
 
 	sync_data #(
-		.WIDTH(ADDR_WIDTH+1),
+		.WIDTH(ADDR_WIDTH + 1),
 		.SYNC_STAGE(1)
-	) raddr_gray_wclk_sync (
-		.clk(wclk),
-		.rstn(wrstn),
-		.data_in(raddr_ptr_gray),
-		.data_out(raddr_gray_wsync)
-	);
-
-	sync_data #(
-		.WIDTH(ADDR_WIDTH+1),
-		.SYNC_STAGE(2)
-	) raddr_gray_rclk_sync (
+	) raddr_rclk_sync (
 		.clk(rclk),
 		.rstn(rrstn),
-		.data_in(raddr_gray_wsync),
+		.data_in(raddr_ptr_gray),
 		.data_out(raddr_gray_rsync)
 	);
 
+	sync_data #(
+		.WIDTH(ADDR_WIDTH + 1),
+		.SYNC_STAGE(2)
+	) raddr_wclk_sync (
+		.clk(wclk),
+		.rstn(wrstn),
+		.data_in(raddr_gray_rsync),
+		.data_out(raddr_gray_wsync)
+	);
+
 	// Full
-	// assign wfull = (
-	// 	{~waddr_gray_wsync[ADDR_WIDTH : ADDR_WIDTH - 1], 
-	// 	  waddr_gray_wsync[ADDR_WIDTH-2:0]} == raddr_gray_wsync) 
-	// 	? 1'b1 : 1'b0;
-	// Correct Logic
 	assign wfull = (
-		{~waddr_ptr_gray[ADDR_WIDTH : ADDR_WIDTH - 1], 
-		  waddr_ptr_gray[ADDR_WIDTH-2:0]} == raddr_gray_wsync) 
-		  ? 1'b1 : 1'b0;
+		{~waddr_gray_wsync[ADDR_WIDTH : ADDR_WIDTH - 1], 
+		  waddr_gray_wsync[ADDR_WIDTH-2:0]} == raddr_gray_wsync) 
+		? 1'b1 : 1'b0;
+	// Correct Logic
+	// assign wfull = (
+	// 	{~waddr_ptr_gray[ADDR_WIDTH : ADDR_WIDTH - 1], 
+	// 	  waddr_ptr_gray[ADDR_WIDTH-2:0]} == raddr_gray_wsync) 
+	// 	  ? 1'b1 : 1'b0;
 
 	// Empty
-	// assign rempty = 
-	// 	   (raddr_gray_rsync == waddr_gray_rsync) ? 1'b1 : 1'b0;
-	// Correct Logic
 	assign rempty = 
-	       (raddr_ptr_gray == waddr_gray_rsync) ? 1'b1 : 1'b0;
+		   (raddr_gray_rsync == waddr_gray_rsync) ? 1'b1 : 1'b0;
+	// Correct Logic
+	// assign rempty = 
+	//        (raddr_ptr_gray == waddr_gray_rsync) ? 1'b1 : 1'b0;
 
 endmodule
 
@@ -196,14 +196,8 @@ module bin2gray #(
 	output [WIDTH - 1 : 0] gray_code
 	
 );
-	generate
-		genvar i;
-		for (i = 0; i < WIDTH - 1; i = i + 1) begin: bin_to_gray
-			assign gray_code[i] = bin_code[i] ^ bin_code[i+1];
-		end
-	endgenerate
 
-	assign gray_code[WIDTH-1] = bin_code[WIDTH-1];
+	assign gray_code = bin_code ^ (bin_code >> 1);
 
 endmodule 
 
@@ -248,14 +242,14 @@ module sync_data #(
 					data_sync <= data_in;
 				end
       		end
-      assign data_out = data_sync;
+      		assign data_out = data_sync;
     	end
 		else begin : sync_stage_more
 			integer i;
 			reg [SYNC_STAGE - 1 : 0][WIDTH - 1 : 0] data_sync;
 			always @(posedge clk or negedge rstn) begin
 				if (~rstn) begin
-					data_sync <= {WIDTH{1'b0}};
+					data_sync <= {SYNC_STAGE{ {WIDTH{1'b0}} }};
 				end 
 				else begin
 					data_sync[0] <= data_in;
