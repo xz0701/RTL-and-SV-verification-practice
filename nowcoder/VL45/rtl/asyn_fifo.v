@@ -209,57 +209,44 @@ module gray2bin #(
 	output [WIDTH - 1 : 0] bin_code
 );
 
+	genvar i;
+	assign bin_code[WIDTH-1] = gray_code[WIDTH-1];
+
 	generate
-		genvar i;
-		for (i = 0; i < WIDTH - 1; i = i + 1) begin : gray_to_bin
-			assign bin_code[i] = gray_code[i] ^ gray_code[i+1];
+		for (i = WIDTH-2; i >= 0; i = i - 1) begin
+			assign bin_code[i] = bin_code[i+1] ^ gray_code[i];
 		end
 	endgenerate
-
-	assign bin_code[WIDTH-1] = gray_code[WIDTH-1];
 
 endmodule 
 
 /***********************************SYNCHRONIZE**************************************/
 module sync_data #(
-	parameter WIDTH = 8,
-  	parameter SYNC_STAGE = 2
+    parameter WIDTH = 8,
+    parameter SYNC_STAGE = 2
 )(
-  	input                  clk,
-  	input                  rstn,
-  	input  [WIDTH - 1 : 0] data_in,
-  	output [WIDTH - 1 : 0] data_out
+    input  wire                  clk,
+    input  wire                  rstn,
+    input  wire [WIDTH-1:0]      data_in,
+    output wire [WIDTH-1:0]      data_out
 );
-  
-  	generate
-		if (SYNC_STAGE == 1) begin : sync_stage_one
-      		reg [WIDTH - 1 : 0] data_sync;
-      		always @(posedge clk or negedge rstn) begin
-        		if (~rstn) begin
-          			data_sync <= {WIDTH{1'b0}};
-				end 
-				else begin
-					data_sync <= data_in;
-				end
-      		end
-      		assign data_out = data_sync;
-    	end
-		else begin : sync_stage_more
-			integer i;
-			reg [SYNC_STAGE - 1 : 0][WIDTH - 1 : 0] data_sync;
-			always @(posedge clk or negedge rstn) begin
-				if (~rstn) begin
-					data_sync <= {SYNC_STAGE{ {WIDTH{1'b0}} }};
-				end 
-				else begin
-					data_sync[0] <= data_in;
-					for (i = 1; i < SYNC_STAGE; i = i + 1) begin
-						data_sync[i] <= data_sync[i-1];
-					end
-				end
-			end
-			assign data_out = data_sync[SYNC_STAGE-1];
-		end
-	endgenerate
+
+    reg [WIDTH-1:0] sync_reg [0:SYNC_STAGE-1];
+
+    integer i;
+
+    always @(posedge clk or negedge rstn) begin
+        if (~rstn) begin
+            for (i = 0; i < SYNC_STAGE; i = i + 1)
+                sync_reg[i] <= {WIDTH{1'b0}};
+        end
+        else begin
+            sync_reg[0] <= data_in;
+            for (i = 1; i < SYNC_STAGE; i = i + 1)
+                sync_reg[i] <= sync_reg[i - 1];
+        end
+    end
+
+    assign data_out = sync_reg[SYNC_STAGE - 1];
 
 endmodule

@@ -1,0 +1,68 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1110-g18392a46)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 9;
+:vpi_module "D:\iverilog\iverilog\lib\ivl\system.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\va_math.vpi";
+S_000001f79f4669d0 .scope module, "gray_counter" "gray_counter" 2 3;
+ .timescale -9 -9;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "rst_n";
+    .port_info 2 /OUTPUT 4 "gray_out";
+o000001f79f4b70e8 .functor BUFZ 1, C4<z>; HiZ drive
+v000001f79f46bad0_0 .net "clk", 0 0, o000001f79f4b70e8;  0 drivers
+v000001f79f46bb70_0 .var "cnt_bin", 3 0;
+v000001f79f46bc10_0 .net "cnt_gray", 3 0, L_000001f79f466e30;  1 drivers
+v000001f79f46bcb0_0 .var "gray_out", 3 0;
+o000001f79f4b7148 .functor BUFZ 1, C4<z>; HiZ drive
+v000001f79f46bd50_0 .net "rst_n", 0 0, o000001f79f4b7148;  0 drivers
+E_000001f79f46d3a0 .event anyedge, v000001f79f466d90_0;
+E_000001f79f46cbe0/0 .event negedge, v000001f79f46bd50_0;
+E_000001f79f46cbe0/1 .event posedge, v000001f79f46bad0_0;
+E_000001f79f46cbe0 .event/or E_000001f79f46cbe0/0, E_000001f79f46cbe0/1;
+S_000001f79f466b60 .scope module, "u_bin2gray" "bin2gray" 2 19, 2 29 0, S_000001f79f4669d0;
+ .timescale -9 -9;
+    .port_info 0 /INPUT 4 "bin_code";
+    .port_info 1 /OUTPUT 4 "gray_code";
+P_000001f79f46ce60 .param/l "WIDTH" 0 2 30, +C4<00000000000000000000000000000100>;
+L_000001f79f466e30 .functor XOR 4, v000001f79f46bb70_0, L_000001f79f4b43a0, C4<0000>, C4<0000>;
+v000001f79f466fe0_0 .net *"_ivl_0", 3 0, L_000001f79f4b43a0;  1 drivers
+v000001f79f467200_0 .net *"_ivl_2", 2 0, L_000001f79f46bdf0;  1 drivers
+L_000001f79f4f8018 .functor BUFT 1, C4<0>, C4<0>, C4<0>, C4<0>;
+v000001f79f46c4c0_0 .net *"_ivl_4", 0 0, L_000001f79f4f8018;  1 drivers
+v000001f79f466cf0_0 .net "bin_code", 3 0, v000001f79f46bb70_0;  1 drivers
+v000001f79f466d90_0 .net "gray_code", 3 0, L_000001f79f466e30;  alias, 1 drivers
+L_000001f79f46bdf0 .part v000001f79f46bb70_0, 1, 3;
+L_000001f79f4b43a0 .concat [ 3 1 0 0], L_000001f79f46bdf0, L_000001f79f4f8018;
+    .scope S_000001f79f4669d0;
+T_0 ;
+    %wait E_000001f79f46cbe0;
+    %load/vec4 v000001f79f46bd50_0;
+    %inv;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.0, 8;
+    %pushi/vec4 0, 0, 4;
+    %assign/vec4 v000001f79f46bb70_0, 0;
+    %jmp T_0.1;
+T_0.0 ;
+    %load/vec4 v000001f79f46bb70_0;
+    %addi 1, 0, 4;
+    %assign/vec4 v000001f79f46bb70_0, 0;
+T_0.1 ;
+    %jmp T_0;
+    .thread T_0;
+    .scope S_000001f79f4669d0;
+T_1 ;
+    %wait E_000001f79f46d3a0;
+    %load/vec4 v000001f79f46bc10_0;
+    %store/vec4 v000001f79f46bcb0_0, 0, 4;
+    %jmp T_1;
+    .thread T_1, $push;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "gray_counter.v";
