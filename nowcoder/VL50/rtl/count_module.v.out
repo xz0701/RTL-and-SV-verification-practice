@@ -1,0 +1,75 @@
+#! /c/Source/iverilog-install/bin/vvp
+:ivl_version "12.0 (devel)" "(s20150603-1110-g18392a46)";
+:ivl_delay_selection "TYPICAL";
+:vpi_time_precision - 9;
+:vpi_module "D:\iverilog\iverilog\lib\ivl\system.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_sys.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\vhdl_textio.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\v2005_math.vpi";
+:vpi_module "D:\iverilog\iverilog\lib\ivl\va_math.vpi";
+S_0000029d657f6a20 .scope module, "count_module" "count_module" 2 3;
+ .timescale -9 -9;
+    .port_info 0 /INPUT 1 "clk";
+    .port_info 1 /INPUT 1 "rst_n";
+    .port_info 2 /OUTPUT 6 "second";
+    .port_info 3 /OUTPUT 6 "minute";
+o0000029d65846fb8 .functor BUFZ 1, C4<z>; HiZ drive
+v0000029d657f6f00_0 .net "clk", 0 0, o0000029d65846fb8;  0 drivers
+v0000029d657f7120_0 .var "flag", 0 0;
+v0000029d657fbde0_0 .var "minute", 5 0;
+o0000029d65847048 .functor BUFZ 1, C4<z>; HiZ drive
+v0000029d657fbe80_0 .net "rst_n", 0 0, o0000029d65847048;  0 drivers
+v0000029d657fbf20_0 .var "second", 5 0;
+E_0000029d657fc030/0 .event negedge, v0000029d657fbe80_0;
+E_0000029d657fc030/1 .event posedge, v0000029d657f6f00_0;
+E_0000029d657fc030 .event/or E_0000029d657fc030/0, E_0000029d657fc030/1;
+    .scope S_0000029d657f6a20;
+T_0 ;
+    %wait E_0000029d657fc030;
+    %load/vec4 v0000029d657fbe80_0;
+    %inv;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.0, 8;
+    %pushi/vec4 0, 0, 6;
+    %assign/vec4 v0000029d657fbf20_0, 0;
+    %pushi/vec4 0, 0, 6;
+    %assign/vec4 v0000029d657fbde0_0, 0;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0000029d657f7120_0, 0;
+    %jmp T_0.1;
+T_0.0 ;
+    %load/vec4 v0000029d657f7120_0;
+    %inv;
+    %flag_set/vec4 8;
+    %jmp/0xz  T_0.2, 8;
+    %load/vec4 v0000029d657fbf20_0;
+    %addi 1, 0, 6;
+    %assign/vec4 v0000029d657fbf20_0, 0;
+    %load/vec4 v0000029d657fbf20_0;
+    %cmpi/e 59, 0, 6;
+    %jmp/0xz  T_0.4, 4;
+    %pushi/vec4 0, 0, 6;
+    %assign/vec4 v0000029d657fbf20_0, 0;
+    %load/vec4 v0000029d657fbde0_0;
+    %addi 1, 0, 6;
+    %assign/vec4 v0000029d657fbde0_0, 0;
+    %load/vec4 v0000029d657fbde0_0;
+    %cmpi/e 59, 0, 6;
+    %jmp/0xz  T_0.6, 4;
+    %pushi/vec4 1, 0, 1;
+    %assign/vec4 v0000029d657f7120_0, 0;
+    %jmp T_0.7;
+T_0.6 ;
+    %pushi/vec4 0, 0, 1;
+    %assign/vec4 v0000029d657f7120_0, 0;
+T_0.7 ;
+T_0.4 ;
+T_0.2 ;
+T_0.1 ;
+    %jmp T_0;
+    .thread T_0;
+# The file index is used to find the file name in the following table.
+:file_names 3;
+    "N/A";
+    "<interactive>";
+    "count_module.v";
