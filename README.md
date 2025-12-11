@@ -17,4 +17,5 @@ The goal is to build a comprehensive, long-term learning record for RTL design a
 ---
 
 ## 📁 Repository Structure
-
+- nowcoder: focused on advanced problems (VL25 - VL58)
+- ChipDev: All the problems
