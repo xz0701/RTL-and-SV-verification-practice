@@ -23,7 +23,7 @@ module model (
 
   always_comb begin
     case (state)
-      IDLE   : next_state = din ? S_5N1 : S_5N; // 0 mod 5 = 1
+      IDLE   : next_state = din ? S_5N1 : S_5N; // 0 mod 5 = 0
       S_5N   : next_state = din ? S_5N1 : S_5N;
       S_5N1  : next_state = din ? S_5N3 : S_5N2;
       S_5N2  : next_state = din ? S_5N  : S_5N4;

@@ -5,14 +5,11 @@ module model #(parameter
   output logic [DATA_WIDTH-1:0] bin
 );
 
-  logic [DATA_WIDTH - 1 : 0] temp;
-
-  always @(*) begin
-    for(int i = 0; i < DATA_WIDTH; i = i + 1) begin
-        temp[i] = ^(gray >> i);
+  always_comb begin
+    bin[DATA_WIDTH - 1] = gray[DATA_WIDTH - 1];
+    for(int i = DATA_WIDTH - 2; i >= 0; i = i - 1) begin
+        bin[i] = gray[i] ^ bin[i + 1];
     end
   end
-
-  assign bin = temp;
 
 endmodule
